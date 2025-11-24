@@ -1,0 +1,215 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "3cc11d24.ff01a2",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "WARNING: please check you have started this container with a volume that is mounted to /data\\n otherwise any flow changes are lost when you redeploy or upgrade the container\\n (e.g. upgrade to a more recent node-red docker image).\\n  If you are using named volumes you can ignore this warning.\\n Double click or see info side panel to learn how to start Node-RED in Docker to save your work",
+        "info": "\nTo start docker with a bind mount volume (-v option), for example:\n\n```\ndocker run -it -p 1880:1880 -v /home/user/node_red_data:/data --name mynodered nodered/node-red\n```\n\nwhere `/home/user/node_red_data` is a directory on your host machine where you want to store your flows.\n\nIf you do not do this then you can experiment and redploy flows, but if you restart or upgrade the container the flows will be disconnected and lost. \n\nThey will still exist in a hidden data volume, which can be recovered using standard docker techniques, but that is much more complex than just starting with a named volume as described above.",
+        "x": 350,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "79719e10815770a2",
+        "type": "openweathermap",
+        "z": "f6f2187d.f17ca8",
+        "name": "OpenWeatherMap",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "IT",
+        "language": "en",
+        "x": 630,
+        "y": 220,
+        "wires": [
+            [
+                "fbe31c5857697390",
+                "d4f2ffd98e0f04d6"
+            ]
+        ]
+    },
+    {
+        "id": "6797a1aa8af11ecc",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "Input message",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "hello",
+        "payload": "",
+        "payloadType": "date",
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "79719e10815770a2"
+            ]
+        ]
+    },
+    {
+        "id": "fbe31c5857697390",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Ouput msg payload",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d4f2ffd98e0f04d6",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Create log file",
+        "func": "let newMsg = {\n    __msgid: msg._msgid,\n    payload: msg.payload.tempc,\n    location: msg.location\n}\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 380,
+        "wires": [
+            [
+                "287f3b90be90935b"
+            ]
+        ]
+    },
+    {
+        "id": "3b3148002cd3f497",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Output temperature",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1190,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "287f3b90be90935b",
+        "type": "file",
+        "z": "f6f2187d.f17ca8",
+        "name": "Log file",
+        "filename": "TemperatureFile",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 1020,
+        "y": 380,
+        "wires": [
+            [
+                "3b3148002cd3f497"
+            ]
+        ]
+    },
+    {
+        "id": "8dc0aa81c58e89aa",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "Tell to read",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "read",
+        "payload": "",
+        "payloadType": "date",
+        "x": 340,
+        "y": 520,
+        "wires": [
+            [
+                "b86ecc70eb1a18ee"
+            ]
+        ]
+    },
+    {
+        "id": "b86ecc70eb1a18ee",
+        "type": "file in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Read from file",
+        "filename": "TemperatureFile",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 580,
+        "y": 520,
+        "wires": [
+            [
+                "fc8d31d56a1a4e94"
+            ]
+        ]
+    },
+    {
+        "id": "fc8d31d56a1a4e94",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Ouput msg payload",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "b92c18836d7cf0a2",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-openweathermap": "1.0.1"
+        }
+    }
+]

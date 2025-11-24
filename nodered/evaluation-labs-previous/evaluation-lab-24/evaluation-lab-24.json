@@ -1,0 +1,255 @@
+[
+    {
+        "id": "180970d2cac8f28a",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4bc7d55441039eff",
+        "type": "mqtt in",
+        "z": "180970d2cac8f28a",
+        "name": "NESLAB Weather input",
+        "topic": "neslabpolimi/smartcity/milan",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "03766533cee373ee",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 540,
+        "wires": [
+            [
+                "c7abc507cb32b790"
+            ]
+        ]
+    },
+    {
+        "id": "cf2d3db35b9b8355",
+        "type": "inject",
+        "z": "180970d2cac8f28a",
+        "name": "trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "boh",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 740,
+        "wires": [
+            [
+                "4bd8e530b40dc07c"
+            ]
+        ]
+    },
+    {
+        "id": "4bd8e530b40dc07c",
+        "type": "function",
+        "z": "180970d2cac8f28a",
+        "name": "generate K",
+        "func": "let max = 10;\nlet min = 0;\n\nlet k = Math.floor(Math.random() * (max - min) + min);\n\nlet newPayload = {\n    origin: \"k-generator\",\n    field: k,\n};\nmsg.payload = newPayload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 740,
+        "wires": [
+            [
+                "435d722bf584677e"
+            ]
+        ]
+    },
+    {
+        "id": "2730f01bf880d5ef",
+        "type": "openweathermap",
+        "z": "180970d2cac8f28a",
+        "name": "temperature in milan",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "IT",
+        "language": "en",
+        "x": 420,
+        "y": 640,
+        "wires": [
+            [
+                "708a04e46af87bb5"
+            ]
+        ]
+    },
+    {
+        "id": "4dc14512671f4ab8",
+        "type": "inject",
+        "z": "180970d2cac8f28a",
+        "name": "trigger opwth",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "ciao",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 640,
+        "wires": [
+            [
+                "2730f01bf880d5ef"
+            ]
+        ]
+    },
+    {
+        "id": "708a04e46af87bb5",
+        "type": "function",
+        "z": "180970d2cac8f28a",
+        "name": "pick only tempk",
+        "func": "let newPayload = {\n    origin: \"open-temperature\",\n    field: msg.payload.tempk,\n};\nmsg.payload = newPayload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 640,
+        "wires": [
+            [
+                "435d722bf584677e"
+            ]
+        ]
+    },
+    {
+        "id": "c7abc507cb32b790",
+        "type": "function",
+        "z": "180970d2cac8f28a",
+        "name": "avg creator",
+        "func": "if (!msg.payload || !msg.payload.fields || msg.payload.fields.temperature === undefined) {\n    msg.payload = context.get(\"avg\");\n    return msg;\n}\n\nlet tempk = parseFloat(msg.payload.fields.temperature);\nlet current_count = context.get(\"count\");\nlet window = context.get(\"window\");\n\nlet sum = 0;\n\nif (current_count < 2) {\n    window.push(tempk);\n    current_count++;\n    \n    context.set(\"count\", current_count);\n} else {\n\n    for(let i = 0; i < (window.length - 1); i++) {\n        window[i] = window[i+1];\n    }\n    window[window.length - 1] = tempk;\n\n}\n\nfor(let element of window) {\n    sum += element;\n}\n\ncontext.set(\"avg\", sum / current_count);\n\nlet newPayload = {\n    origin: \"avg-generator\",\n    field: context.get(\"avg\"),\n};\nmsg.payload = newPayload;\n\ncontext.set(\"window\", window);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set(\"window\", []);\ncontext.set(\"avg\", 0);\ncontext.set(\"count\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 540,
+        "wires": [
+            [
+                "435d722bf584677e"
+            ]
+        ]
+    },
+    {
+        "id": "435d722bf584677e",
+        "type": "function",
+        "z": "180970d2cac8f28a",
+        "name": "function parser",
+        "func": "switch(msg.payload.origin) {\n    case \"avg-generator\": {\n        context.set(\"last-avg\", msg.payload.field);\n        break;\n    }\n    case \"open-temperature\": {\n        context.set(\"open-temperature\", msg.payload.field);\n        break;\n    }\n    case \"k-generator\": {\n        context.set(\"last-k\", msg.payload.field);\n        break;\n    }\n}\n\nlet message = \"\";\nif (Math.abs(context.get(\"last-avg\") - context.get(\"open-temperature\")) > context.get(\"last-k\")) {\n    message = \"Temperature data is not coherent!\";\n} else {\n    message = \"Ok!\";\n}\n\nlet newPayload = {\n    avg: context.get(\"last-avg\"),\n    open: context.get(\"open-temperature\"),\n    k: context.get(\"last-k\"),\n    reply: message,\n};\nmsg.payload = newPayload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set(\"last-avg\", 0);\ncontext.set(\"open-temp\", 0);\ncontext.set(\"last-k\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 880,
+        "y": 640,
+        "wires": [
+            [
+                "a92cf630c2bfa936",
+                "9b18dedc661b73ed"
+            ]
+        ]
+    },
+    {
+        "id": "a92cf630c2bfa936",
+        "type": "mqtt out",
+        "z": "180970d2cac8f28a",
+        "name": "NESLAB Weather Publish",
+        "topic": "neslabpolimi/nsds/eval24/alarm",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "03766533cee373ee",
+        "x": 1110,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "9b18dedc661b73ed",
+        "type": "debug",
+        "z": "180970d2cac8f28a",
+        "name": "output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1050,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "03766533cee373ee",
+        "type": "mqtt-broker",
+        "name": "NESLAB Weather",
+        "broker": "mqtt.neslab.it",
+        "port": "3200",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

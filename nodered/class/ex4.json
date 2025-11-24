@@ -1,0 +1,99 @@
+[
+    {
+        "id": "1b50018921bcd683",
+        "type": "tab",
+        "label": "Flow 4",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "fbf6a4a558bd5ba3",
+        "type": "mqtt in",
+        "z": "1b50018921bcd683",
+        "name": "NETLAB input",
+        "topic": "neslabpolimi/smartcity/milan",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "6eb6db2446cd9d01",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 200,
+        "wires": [
+            [
+                "6cc7d05951205f3c"
+            ]
+        ]
+    },
+    {
+        "id": "7e704c9944ac3429",
+        "type": "debug",
+        "z": "1b50018921bcd683",
+        "name": "NETLAB output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "6cc7d05951205f3c",
+        "type": "function",
+        "z": "1b50018921bcd683",
+        "name": "Restrict payload",
+        "func": "let newPayload = {\n    temperature: msg.payload.fields.temperature,\n    humidity: msg.payload.fields.humidity,\n    pm25: msg.payload.fields.pm25,\n    pm10: msg.payload.fields.pm10,\n};\n\nmsg.payload = newPayload;\n\n\nreturn [msg, null];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 200,
+        "wires": [
+            [
+                "7e704c9944ac3429"
+            ]
+        ]
+    },
+    {
+        "id": "6eb6db2446cd9d01",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "mqtt.neslab.it",
+        "port": "3200",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

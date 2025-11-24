@@ -1,0 +1,341 @@
+[
+    {
+        "id": "cd5ff2d88a712156",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "9c769642967f356d",
+        "type": "chatbot-telegram-receive",
+        "z": "cd5ff2d88a712156",
+        "bot": "08849e71304cdd58",
+        "botProduction": "08849e71304cdd58",
+        "x": 170,
+        "y": 260,
+        "wires": [
+            [
+                "4a260a3ff9bd90fa",
+                "c1fc88d8ec423c6b"
+            ]
+        ]
+    },
+    {
+        "id": "4a260a3ff9bd90fa",
+        "type": "function",
+        "z": "cd5ff2d88a712156",
+        "name": "command parser",
+        "func": "let command = msg.payload.content;\nlet weather_prefix = \"/weather_forecast \";\nlet wind_prefix = \"/wind_forecast \";\n\n// Completely useless because there's the originalMessage in the response message from oper weather\nif(command.includes(weather_prefix) || command.includes(wind_prefix)) {\n    if(command.includes(\"Milan\")) {\n        flow.set(\"city\", 1); // Milan\n    } else if(command.includes(\"Rome\")) {\n        flow.set(\"city\", 2); // Rome\n    } else {\n        return [null, msg];\n    }\n\n    if(command.includes(\"1\")) {\n        flow.set(\"day\", 1); // day 1\n    } else if(command.includes(\"2\")) {\n        flow.set(\"day\", 2); // day 2\n    } else {\n        return [null, msg];\n    }\n\n    if(command.includes(weather_prefix)) {\n        flow.set(\"op\", 1); // temperature\n    } else if(command.includes(wind_prefix)){\n        flow.set(\"op\", 2); // wind\n    } else {\n        return [null, msg];\n    }\n\n    return [msg, null];\n} else {\n    return [null, msg];\n}",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\nflow.set(\"city\", 0); // 1 milan - 2 rome\nflow.set(\"day\", 0); // 1 tomorrow - 2 after tomorrow\nflow.set(\"op\", 0); // 1 temperature - 2 wind\n\nflow.set(\"temperature-count\", 0);\nflow.set(\"wind-count\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 260,
+        "wires": [
+            [
+                "e1ce9cddb0d299dc"
+            ],
+            [
+                "c44ee23306d290b3"
+            ]
+        ]
+    },
+    {
+        "id": "c1fc88d8ec423c6b",
+        "type": "debug",
+        "z": "cd5ff2d88a712156",
+        "name": "output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "c44ee23306d290b3",
+        "type": "chatbot-message",
+        "z": "cd5ff2d88a712156",
+        "name": "unknown command",
+        "message": [
+            {
+                "message": "No command exists or not correctly filled"
+            }
+        ],
+        "language": "none",
+        "x": 800,
+        "y": 700,
+        "wires": [
+            [
+                "2868e68ae0eda505"
+            ]
+        ]
+    },
+    {
+        "id": "2868e68ae0eda505",
+        "type": "chatbot-telegram-send",
+        "z": "cd5ff2d88a712156",
+        "bot": "08849e71304cdd58",
+        "botProduction": "08849e71304cdd58",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1230,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "e1ce9cddb0d299dc",
+        "type": "function",
+        "z": "cd5ff2d88a712156",
+        "name": "milan or rome?",
+        "func": "if(flow.get(\"city\") == 1) {\n    return [msg, null]; // Milan\n} else {\n    return [null, msg]; // Rome\n}",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 240,
+        "wires": [
+            [
+                "ab92be2d465e8aee"
+            ],
+            [
+                "ea2fbe9facd0382f"
+            ]
+        ]
+    },
+    {
+        "id": "ab92be2d465e8aee",
+        "type": "openweathermap",
+        "z": "cd5ff2d88a712156",
+        "name": "milan info",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "IT",
+        "language": "en",
+        "x": 840,
+        "y": 200,
+        "wires": [
+            [
+                "928be4ca75ec1396"
+            ]
+        ]
+    },
+    {
+        "id": "ea2fbe9facd0382f",
+        "type": "openweathermap",
+        "z": "cd5ff2d88a712156",
+        "name": "rome info",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Rome",
+        "country": "IT",
+        "language": "en",
+        "x": 840,
+        "y": 280,
+        "wires": [
+            [
+                "928be4ca75ec1396"
+            ]
+        ]
+    },
+    {
+        "id": "928be4ca75ec1396",
+        "type": "function",
+        "z": "cd5ff2d88a712156",
+        "name": "day picker",
+        "func": "if(flow.get(\"day\") == 1) {\n    msg.payload = msg.payload[9];\n} else {\n    msg.payload = msg.payload[18];\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 240,
+        "wires": [
+            [
+                "cd458789001e398d",
+                "bb3ced48d0637b30"
+            ]
+        ]
+    },
+    {
+        "id": "cd458789001e398d",
+        "type": "function",
+        "z": "cd5ff2d88a712156",
+        "name": "op picker",
+        "func": "let newPayload = {\n    day: \"\",\n    op: \"\",\n    data: 0,\n    city: \"\",\n};\n\nif(flow.get(\"op\") == 1) {\n    newPayload.op = \"temperature\";\n    newPayload.data = msg.data.main.temp;\n\n    flow.set(\"temperature-count\", flow.get(\"temperature-count\") + 1);\n} else {\n    newPayload.op = \"wind\";\n    msg.payload = msg.data.wind.speed;\n\n    flow.set(\"wind-count\", flow.get(\"wind-count\") + 1);\n}\n\nif(flow.get(\"day\") == 1) {\n    newPayload.day = \"1 day from now\";\n} else {\n    newPayload.day = \"2 days from now\";\n}\n\nif(flow.get(\"city\") == 1) {\n    newPayload.city = \"Milano\";\n} else {\n    newPayload.city = \"Rome\";\n}\n\nmsg.payload = newPayload;\n\nif (context.get(\"last-data\") == newPayload.data) {\n    context.set(\"last-data\", newPayload.data);\n    return [msg, null]; // same as last time\n} else {\n    context.set(\"last-data\", newPayload.data);\n    return [null, msg]; // different from last time\n}",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set(\"last-data\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 460,
+        "wires": [
+            [
+                "7507a2d06fd37c47"
+            ],
+            [
+                "56dc58c8518964b6"
+            ]
+        ]
+    },
+    {
+        "id": "7507a2d06fd37c47",
+        "type": "chatbot-message",
+        "z": "cd5ff2d88a712156",
+        "name": "parse response",
+        "message": [
+            {
+                "message": "The {{msg.payload.op}} in {{msg.payload.city}} {{msg.payload.day}} is {{msg.payload.data}}.\nIt's the same data as the last time you asked."
+            }
+        ],
+        "language": "none",
+        "x": 960,
+        "y": 420,
+        "wires": [
+            [
+                "2868e68ae0eda505"
+            ]
+        ]
+    },
+    {
+        "id": "bb3ced48d0637b30",
+        "type": "debug",
+        "z": "cd5ff2d88a712156",
+        "name": "output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1210,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "f76127ee4ecdf13b",
+        "type": "inject",
+        "z": "cd5ff2d88a712156",
+        "name": "trigger saving persistently",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "palle",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 840,
+        "wires": [
+            [
+                "e898aaaeca1649d5"
+            ]
+        ]
+    },
+    {
+        "id": "e898aaaeca1649d5",
+        "type": "function",
+        "z": "cd5ff2d88a712156",
+        "name": "parsing saving data",
+        "func": "let newPayload = {\n    temperature_count: flow.get(\"temperature-count\"),\n    wind_count: flow.get(\"wind-count\"),\n}\n\nmsg.payload = newPayload;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 840,
+        "wires": [
+            [
+                "62e382dc81052b20"
+            ]
+        ]
+    },
+    {
+        "id": "62e382dc81052b20",
+        "type": "file",
+        "z": "cd5ff2d88a712156",
+        "name": "save counter on file",
+        "filename": "counte_operation_log.txt",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 680,
+        "y": 840,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "56dc58c8518964b6",
+        "type": "chatbot-message",
+        "z": "cd5ff2d88a712156",
+        "name": "parse response",
+        "message": [
+            {
+                "message": "The {{msg.payload.op}} in {{msg.payload.city}} {{msg.payload.day}} is {{msg.payload.data}}.\nIt changed since the last time you asked."
+            }
+        ],
+        "language": "none",
+        "x": 960,
+        "y": 480,
+        "wires": [
+            [
+                "2868e68ae0eda505"
+            ]
+        ]
+    },
+    {
+        "id": "08849e71304cdd58",
+        "type": "chatbot-telegram-node",
+        "botname": "Node-RED Lab",
+        "usernames": "",
+        "polling": "1000",
+        "store": "",
+        "log": "",
+        "debug": false,
+        "skipMediaFiles": false,
+        "webHook": "",
+        "connectMode": "polling",
+        "storeMessages": true,
+        "enableMissionControl": false,
+        "inspectMessages": true,
+        "chatbotId": ""
+    }
+]

@@ -1,0 +1,172 @@
+[
+    {
+        "id": "f606407b9061204a",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c679663bbc833c72",
+        "type": "chatbot-telegram-receive",
+        "z": "f606407b9061204a",
+        "bot": "e145681d1fc7e143",
+        "botProduction": "e145681d1fc7e143",
+        "x": 270,
+        "y": 140,
+        "wires": [
+            [
+                "66d28b026fbdddd9",
+                "d31bd83a690544e2"
+            ]
+        ]
+    },
+    {
+        "id": "66d28b026fbdddd9",
+        "type": "debug",
+        "z": "f606407b9061204a",
+        "name": "Show Incoming Msg!",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "bc548a1e5e418bd5",
+        "type": "chatbot-message",
+        "z": "f606407b9061204a",
+        "name": "Nothing found",
+        "message": [
+            {
+                "message": "No command found!"
+            }
+        ],
+        "language": "en",
+        "x": 870,
+        "y": 480,
+        "wires": [
+            [
+                "4d75c6ec2eabd0f0"
+            ]
+        ]
+    },
+    {
+        "id": "4d75c6ec2eabd0f0",
+        "type": "chatbot-telegram-send",
+        "z": "f606407b9061204a",
+        "bot": "e145681d1fc7e143",
+        "botProduction": "e145681d1fc7e143",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1230,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "d31bd83a690544e2",
+        "type": "function",
+        "z": "f606407b9061204a",
+        "name": "Command is right?",
+        "func": "if(msg.payload.content.includes(\"My name is \")) {\n    const prefixToRemove = \"My name is \";\n    msg.payload.content = msg.payload.content.replace(prefixToRemove, \"\");\n\n    return [msg, null];\n} else {\n    return [null, msg]\n}",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 320,
+        "wires": [
+            [
+                "deae6a947123166e",
+                "75bcdc32a5a6e8ab"
+            ],
+            [
+                "bc548a1e5e418bd5"
+            ]
+        ]
+    },
+    {
+        "id": "deae6a947123166e",
+        "type": "chatbot-message",
+        "z": "f606407b9061204a",
+        "name": "",
+        "message": [
+            {
+                "message": "Hello {{msg.payload.content}}!"
+            }
+        ],
+        "language": "none",
+        "x": 910,
+        "y": 340,
+        "wires": [
+            [
+                "4d75c6ec2eabd0f0"
+            ]
+        ]
+    },
+    {
+        "id": "76108543173b2897",
+        "type": "file",
+        "z": "f606407b9061204a",
+        "name": "Write name on file",
+        "filename": "nameLog.txt",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 1050,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "75bcdc32a5a6e8ab",
+        "type": "function",
+        "z": "f606407b9061204a",
+        "name": "Select of the name",
+        "func": "msg.payload = msg.payload.content;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 240,
+        "wires": [
+            [
+                "76108543173b2897"
+            ]
+        ]
+    },
+    {
+        "id": "e145681d1fc7e143",
+        "type": "chatbot-telegram-node",
+        "botname": "Node-RED Lab",
+        "usernames": "",
+        "polling": "1000",
+        "store": "",
+        "log": "",
+        "debug": false,
+        "skipMediaFiles": false,
+        "webHook": "",
+        "connectMode": "polling",
+        "storeMessages": true,
+        "enableMissionControl": false,
+        "inspectMessages": true,
+        "chatbotId": ""
+    }
+]

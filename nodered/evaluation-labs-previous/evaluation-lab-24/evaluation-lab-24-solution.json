@@ -1,0 +1,347 @@
+[
+    {
+        "id": "f297466f3ce2446a",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1bdbbd8ed9c6c075",
+        "type": "mqtt in",
+        "z": "f297466f3ce2446a",
+        "name": "neslabpolimi/smartcity/milan",
+        "topic": "neslabpolimi/smartcity/milan",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "f0139ec6f5fd528e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 380,
+        "wires": [
+            [
+                "59ee6087bf72c17b"
+            ]
+        ]
+    },
+    {
+        "id": "e216612326919ba5",
+        "type": "function",
+        "z": "f297466f3ce2446a",
+        "name": "Update K",
+        "func": "flow.set(\"k\", msg.payload);\nmsg.payload = \"Updated latest k:\" + flow.get(\"k\");\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 80,
+        "wires": [
+            [
+                "3424abaeb899408a"
+            ]
+        ]
+    },
+    {
+        "id": "5dfea4e752c791e0",
+        "type": "mqtt in",
+        "z": "f297466f3ce2446a",
+        "name": "neslabpolimi/nsds/eval24/k",
+        "topic": "neslabpolimi/nsds/eval24/k",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "f0139ec6f5fd528e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 80,
+        "wires": [
+            [
+                "a17982dcea81393e"
+            ]
+        ]
+    },
+    {
+        "id": "a17982dcea81393e",
+        "type": "rbe",
+        "z": "f297466f3ce2446a",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": false,
+        "property": "payload",
+        "topi": "topic",
+        "x": 410,
+        "y": 80,
+        "wires": [
+            [
+                "e216612326919ba5"
+            ]
+        ]
+    },
+    {
+        "id": "3424abaeb899408a",
+        "type": "debug",
+        "z": "f297466f3ce2446a",
+        "name": "Log the new K",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "658a78ae43ea75b6",
+        "type": "openweathermap",
+        "z": "f297466f3ce2446a",
+        "name": "Current Milan Weather",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "IT",
+        "language": "en",
+        "x": 440,
+        "y": 140,
+        "wires": [
+            [
+                "c651025a2f3f5da3"
+            ]
+        ]
+    },
+    {
+        "id": "4aeb763e67375960",
+        "type": "inject",
+        "z": "f297466f3ce2446a",
+        "name": "Trigger every minute",
+        "props": [],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 180,
+        "y": 140,
+        "wires": [
+            [
+                "658a78ae43ea75b6"
+            ]
+        ]
+    },
+    {
+        "id": "8c55b250aaaf440b",
+        "type": "debug",
+        "z": "f297466f3ce2446a",
+        "name": "Log Updated latest Temp",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "59ee6087bf72c17b",
+        "type": "function",
+        "z": "f297466f3ce2446a",
+        "name": "Sliding the window",
+        "func": "if(msg.payload.fields.hasOwnProperty('temperature')){\n    let lastElements = context.get(\"lastElements\");\n    let counter = context.get(\"counter\");\n    lastElements[counter % 10] = msg.payload.fields.temperature;\n    context.set(\"lastElements\", lastElements);\n    context.set(\"counter\", counter+1);\n    msg.payload = lastElements;\n    return msg;\n}else{\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set(\"lastElements\", [])\ncontext.set(\"counter\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 380,
+        "wires": [
+            [
+                "3c9fde176712d532",
+                "6bb3cace732d2c09"
+            ]
+        ]
+    },
+    {
+        "id": "c651025a2f3f5da3",
+        "type": "function",
+        "z": "f297466f3ce2446a",
+        "name": "Update latestOpenWMTemp",
+        "func": "if(msg.payload.hasOwnProperty('tempk')){\n    flow.set('latestOpenWMTemp', msg.payload.tempk);\n    msg.payload = \"Updated lastestOpenWMTemp: \"+ msg.payload.tempk;\n    return msg;\n}else{\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 140,
+        "wires": [
+            [
+                "8c55b250aaaf440b"
+            ]
+        ]
+    },
+    {
+        "id": "3c9fde176712d532",
+        "type": "debug",
+        "z": "f297466f3ce2446a",
+        "name": "Log latest 10 temperatures",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "6bb3cace732d2c09",
+        "type": "function",
+        "z": "f297466f3ce2446a",
+        "name": "Do the average",
+        "func": "let tempArr = msg.payload;\nlet avg = tempArr.length == 0 ? null\n    : tempArr.reduce((acc, c) => acc + c, 0) / tempArr.length;\nmsg.payload = avg;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 380,
+        "wires": [
+            [
+                "a625f235df4778d3",
+                "2f523a360c6fd4cf"
+            ]
+        ]
+    },
+    {
+        "id": "a625f235df4778d3",
+        "type": "debug",
+        "z": "f297466f3ce2446a",
+        "name": "Log the actual average",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2f523a360c6fd4cf",
+        "type": "function",
+        "z": "f297466f3ce2446a",
+        "name": "Do the comparison",
+        "func": "let k = flow.get(\"k\");\nlet latestOpenWMTemp = flow.get(\"latestOpenWMTemp\");\nlet latestAvg = msg.payload;\nif(Math.abs(latestAvg-latestOpenWMTemp)>k){\n    msg.payload = \"Temperature data is not coherent!\";\n    return msg;\n} else {\n    console.log(\"Coherent!\");\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 380,
+        "wires": [
+            [
+                "d45e0845be36d7a4",
+                "3b820dd72aeb2415"
+            ]
+        ]
+    },
+    {
+        "id": "d45e0845be36d7a4",
+        "type": "debug",
+        "z": "f297466f3ce2446a",
+        "name": "Log if is not coherent",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 960,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "3b820dd72aeb2415",
+        "type": "mqtt out",
+        "z": "f297466f3ce2446a",
+        "name": "Trigger alarm!",
+        "topic": "neslabpolimi/nsds/eval24/alarm",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "f0139ec6f5fd528e",
+        "x": 1140,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "f0139ec6f5fd528e",
+        "type": "mqtt-broker",
+        "name": "neslab",
+        "broker": "mqtt.neslab.it",
+        "port": "3200",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

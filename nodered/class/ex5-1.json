@@ -1,0 +1,21 @@
+[
+    {
+        "id": "204329395be6b3c2",
+        "type": "openweathermap",
+        "z": "0f878789f06582b5",
+        "name": "Check-weather",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Rome",
+        "country": "IT",
+        "language": "en",
+        "x": 620,
+        "y": 340,
+        "wires": [
+            [
+                "611abb010abbc49a"
+            ]
+        ]
+    }
+]
