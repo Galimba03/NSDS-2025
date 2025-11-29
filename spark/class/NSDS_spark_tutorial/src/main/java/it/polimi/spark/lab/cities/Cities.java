@@ -124,7 +124,7 @@ public class Cities {
                 .join(citiesRegions, "city")
                 .select(col("id"), col("region"));
         staticCityInfo.cache();
-        
+
 
         // Bookings: the value represents the city of the booking
         final Dataset<Row> bookings = spark

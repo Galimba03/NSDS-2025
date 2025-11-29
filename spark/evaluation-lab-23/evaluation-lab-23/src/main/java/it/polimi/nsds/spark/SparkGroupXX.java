@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.window;
 
 /*
  * Group number: XX
@@ -34,6 +35,8 @@ public class SparkGroupXX {
                 .builder()
                 .master(master)
                 .appName("SparkEval")
+                .config("spark.driver.bindAddress", "127.0.0.1")
+                .config("spark.driver.host", "127.0.0.1")
                 .getOrCreate();
         spark.sparkContext().setLogLevel("ERROR");
 
@@ -60,7 +63,7 @@ public class SparkGroupXX {
                 .option("header", "false")
                 .option("delimiter", ",")
                 .schema(profsSchema)
-                .csv(filePath + "files/profs.csv");
+                .csv(filePath + "files/evaluation-23/profs.csv");
 
         // Courses: course_name, course_hours, course_students
         final Dataset<Row> courses = spark
@@ -68,7 +71,7 @@ public class SparkGroupXX {
                 .option("header", "false")
                 .option("delimiter", ",")
                 .schema(coursesSchema)
-                .csv(filePath + "files/courses.csv");
+                .csv(filePath + "files/evaluation-23/courses.csv");
 
         // Videos: video_id, video_duration, course_name
         final Dataset<Row> videos = spark
@@ -76,7 +79,12 @@ public class SparkGroupXX {
                 .option("header", "false")
                 .option("delimiter", ",")
                 .schema(videosSchema)
-                .csv(filePath + "files/videos.csv");
+                .csv(filePath + "files/evaluation-23/videos.csv");
+
+        // caching because they will be used later over and over again
+        profs.cache();
+        courses.cache();
+        videos.cache();
 
         // Visualizations: value, timestamp
         // value represents the video id
@@ -87,31 +95,54 @@ public class SparkGroupXX {
                 .load()
                 .withColumn("value", col("value").mod(numCourses));
 
-        /**
-         * TODO: Enter your code below
-         */
-
         /*
          * Query Q1. Compute the total number of lecture hours per prof
          */
-
-        final Dataset<Row> q1 = null; // TODO
-
+        final Dataset<Row> q1 = profs
+                .join(courses, profs.col("course_name").equalTo(courses.col("course_name")))
+                .groupBy(profs.col("prof_name"))
+                .sum("course_hours");
         q1.show();
 
         /*
          * Query Q2. For each course, compute the total duration of all the visualizations of videos of that course,
          * computed over a minute, updated every 10 seconds
          */
+        final Dataset<Row> videosForCourse = videos
+                .join(courses, "course_name")
+                .select(col("course_name"), col("video_id"), col("course_students"));
 
-        final StreamingQuery q2 = null; // TODO
+        final StreamingQuery q2 = visualizations
+                .join(videosForCourse, videosForCourse.col("video_id").equalTo(visualizations.col("value")))
+                .groupBy(
+                        col("course_name"),
+                        window(col("timestamp"), "60 seconds", "10 seconds")
+                )
+                .count()
+                .writeStream()
+                .outputMode("update")
+                .format("console")
+                .start();
 
         /*
          * Query Q3. For each video, compute the total number of visualizations of that video
          * with respect to the number of students in the course in which the video is used.
          */
+        final StreamingQuery q3 = visualizations
+                .join(videosForCourse, videosForCourse.col("video_id").equalTo(visualizations.col("value")))
+                .groupBy(
+                        col("video_id"),
+                        col("course_students")
+                )
+                // 2. Conta (questo crea automaticamente una colonna chiamata "count")
+                .count()
+                // 3. Calcola il rapporto usando la colonna "count" e "course_students" che abbiamo preservato
+                .withColumn("ratio", col("count").divide(col("course_students")))
+                .writeStream()
+                .outputMode("complete")
+                .format("console")
+                .start();
 
-        final StreamingQuery q3 = null; // TODO
 
         try {
             q2.awaitTermination();
