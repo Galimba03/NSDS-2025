@@ -4,7 +4,7 @@
 #include <math.h>
 #include <mpi.h>
 
-const int num_iter_per_proc = 100000000;
+const int num_iter_per_proc = 10 * 1000 * 1000;
 
 float generate_random_point() {
   return (float)rand() / (float)RAND_MAX;
@@ -36,6 +36,8 @@ int main() {
   }
 
   if (rank == 0) {
+    // FIXIT: this is not good because we have no PROBE
+
     int temp_val;
 
     sum = temp_sum;

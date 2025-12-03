@@ -7,7 +7,7 @@
 int rank;
 int num_procs;
 
-const int num_rounds = 10000;
+const int num_rounds = 1000;
 
 const int min_num = 1;
 const int max_num = 1000;
@@ -28,7 +28,7 @@ void allocate_vars() {
   // Only Rank 0 maintains the leaderboard
   if (rank == 0) {
     leaderboard = (int*)malloc(num_procs * sizeof(int));
-    memset(leaderboard, 0, num_procs * sizeof(int));
+    memset((void*)leaderboard, 0, num_procs * sizeof(int));
   }
 
   // Any process could potentially become the leader, so all must allocate this buffer
