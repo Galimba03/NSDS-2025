@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
     local_count[i].c = i + 'a';
     local_count[i].count = 0;
   }
+  
   FILE *file = fopen(my_file, "r");
   char c;
   while ((c = fgetc(file)) != EOF) {
