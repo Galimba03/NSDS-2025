@@ -50,25 +50,29 @@ int main(int argc, char** argv) {
  
   // Within each iteration, we move backward, from the last segment to the first
   for (int it = 1; it <= num_iterations; ++it) {
-    // Last segment
+
+    // Last segment. We are calculating how much cars are exiting the last spot of the array for process
     int num_car_exiting = 0;
     for (int car = 0; car < segments[segments_per_proc-1]; ++car) {
       if (move_next_segment()) {
-	num_car_exiting++;
+	      num_car_exiting++;
       }
     }
     segments[segments_per_proc-1] -= num_car_exiting;
+
+    // If I'm not the last process, I send to the next process the elements going out of my competence
     if (rank < num_procs-1) {
       MPI_Send(&num_car_exiting, 1, MPI_INT, rank+1, default_tag, MPI_COMM_WORLD);
     }
 
     // Intermediate segments
+    // Pass cars going to the next segment under my competence
     for (int seg = segments_per_proc-2; seg >= 0; --seg) {
       int num_cars_to_move = 0;
       for (int car = 0; car < segments[seg]; ++car) {
-	if (move_next_segment()) {
-	  num_cars_to_move++;
-	}
+        if (move_next_segment()) {
+          num_cars_to_move++;
+        }
       }
       segments[seg] -= num_cars_to_move;
       segments[seg+1] += num_cars_to_move;
@@ -84,15 +88,17 @@ int main(int argc, char** argv) {
     }
 
     // When needed, compute the overall sum
-    if (it%count_every == 0) {
+    if (it % count_every == 0) {
+      
       int local_sum = 0;
       for (int seg = 0; seg < segments_per_proc; seg++) {
-	local_sum += segments[seg];
+	      local_sum += segments[seg];
       }
+
       int global_sum = 0;
       MPI_Reduce(&local_sum, &global_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank == 0) {
-	printf("Iteration: %d, sum: %d\n", it, global_sum);
+	      printf("Iteration: %d, sum: %d\n", it, global_sum);
       }
     }
     
