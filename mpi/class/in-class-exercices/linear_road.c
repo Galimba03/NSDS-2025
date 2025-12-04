@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 
       - Comunicazione: MPI_Isend usato in quel modo è pericoloso perché modifichi il buffer outgoing_cars nel ciclo successivo potenzialmente prima che la send sia finita. MPI_Sendrecv è molto più sicuro e pulito per questi pattern a catena (shift).
   */
-  // TODO: define and init variables
+  // define and init variables
   MPI_Request request; 
   int local_cars = 0;
   int outgoing_cars = 0;
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
     if (it%count_every == 0) {
       int global_sum = 0;
 
-      // TODO compute global sum
+      // compute global sum
       MPI_Reduce(&local_cars, &global_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       
       if (rank == 0) {
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
     MPI_Barrier(MPI_COMM_WORLD);
   }
 
-  // TODO deallocate dynamic variables, if needed
+  // deallocate dynamic variables, if needed
   
   MPI_Finalize();
 }
