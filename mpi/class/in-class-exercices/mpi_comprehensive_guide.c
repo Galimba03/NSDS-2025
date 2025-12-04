@@ -74,6 +74,29 @@ void demo_deadlock_fix(int rank, int num_procs) {
  * Allows overlapping computation with communication.
  * Key Functions: MPI_Isend, MPI_Irecv, MPI_Wait
  */
+/**
+ * MPI_Isend (Non Bloccante / Immediate)
+    Quando chiami MPI_Isend, la funzione ritorna istantaneamente, quasi a tempo zero. Il programma passa subito alla riga successiva.
+    Cosa succede: Hai solo detto a MPI "Per favore, inizia a spedire questi dati in background".
+    Il Pericolo: Dato che la funzione ritorna subito, l'invio potrebbe non essere ancora iniziato o finito. NON puoi toccare o modificare la variabile che hai inviato finché non verifichi che l'invio è completo. Se modifichi la variabile subito dopo MPI_Isend, potresti inviare dati corrotti (metà vecchi, metà nuovi).
+    La Verifica: Devi usare MPI_Wait (o MPI_Test) per aspettare che l'operazione in background finisca, prima di poter riutilizzare quella variabile.
+
+    MPI_Request request;
+    buffer[0] = 100;
+
+    // Ritorna SUBITO. L'invio avviene in background.
+    MPI_Isend(buffer, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, &request);
+
+    // !!! PERICOLO - Non toccare 'buffer' qui !!!
+    // Ma puoi fare calcoli che NON usano 'buffer'
+    fai_calcoli_complessi(); // <--- Questo avviene MENTRE i dati viaggiano!
+
+    // Ora aspetto che l'invio sia finito prima di riusare il buffer
+    MPI_Wait(&request, MPI_STATUS_IGNORE);
+
+    // Ora è sicuro modificare il buffer
+    buffer[0] = 200;
+ */
 void demo_non_blocking(int rank) {
     if (rank > 1) return; // Demo for first 2 ranks only
 
