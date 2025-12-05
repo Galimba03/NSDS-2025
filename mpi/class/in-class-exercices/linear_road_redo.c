@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
   // Determina i vicini (Topologia Lineare)
   // Rank 0 riceve da nessuno (MPI_PROC_NULL), manda a 1
   // Rank N riceve da N-1, manda a nessuno (MPI_PROC_NULL -> le auto escono dalla simulazione)
+  // TODO: ask this
   int source = (rank == 0) ? MPI_PROC_NULL : rank - 1;
   int dest   = (rank == num_procs - 1) ? MPI_PROC_NULL : rank + 1;
 
@@ -101,6 +102,7 @@ int main(int argc, char** argv) {
     // C. Comunicazione (Boundary Exchange)
     // Spedisco le auto che escono a destra, ricevo le auto che entrano da sinistra
     // MPI_Sendrecv gestisce automaticamente l'ordine per evitare deadlock
+    // TODO: ask this
     MPI_Sendrecv(&cars_exiting_local_road, 1, MPI_INT, dest, 0,
                  &cars_entering_local_road, 1, MPI_INT, source, 0,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);

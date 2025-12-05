@@ -54,6 +54,7 @@ void send_num_to_leader(int num) {
   // MPI_Gather(sendbuf, sendcount, sendtype, 
   //            recvbuf, recvcount, recvtype, 
   //            root, comm)
+  // TODO: it's not good because we are not inputting an array of elements
   MPI_Gather(&num, 1, MPI_INT, 
              selected_numbers, 1, MPI_INT, 
              leader, MPI_COMM_WORLD);
