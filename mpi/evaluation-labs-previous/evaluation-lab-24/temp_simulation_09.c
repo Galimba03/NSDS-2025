@@ -133,6 +133,7 @@ int main(int argc, char **argv) {
     free(processor_array);
     free(next_processor_array);
 
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
     return 0;
 }
