@@ -1,0 +1,32 @@
+Rules
+- Rename the particle_migration_XX.c file replacing XX with the number of your group
+- Write in the comment on top of the file your group number and the name of all group members
+- Submit only a single c file with your solution
+
+Requirements
+- You are to implement a simulator of particles moving in a linear 1D space of length L.
+- The domain is divided into N sub-domains, where N is the number of processes.
+    - Rank 0 manages 0 to L/N.
+    - Rank 1 manages L/N to 2L/N, etc.
+- The simulation evolves in discrete rounds for num_iterations.
+
+Initialization
+- Process 0 initializes num_particles particles.
+- Each particle has a position (x) and a velocity (v).
+- Process 0 distributes the particles to the correct owner process based on their initial position.
+    - Note: You can use Scatter or a manual Send loop for this initial setup.
+
+Simulation Step
+- At each iteration, every process updates the position of its local particles: x_{new}​=x_{old}​+v.
+- Migration:
+    - If a particle crosses the left boundary of the process, it must be sent to rank - 1.
+    - If a particle crosses the right boundary of the process, it must be sent to rank + 1.
+    - Particles leaving the global domain (x<0 or x>L) bounce back (invert velocity) and stay in the current process.
+
+Communication Requirement:
+- The number of particles leaving a process in any given iteration is random and unknown to the receiver.
+- You must use MPI_Probe to check for incoming particles from neighbors before receiving them, as you do not know how many particles are arriving.
+
+Reporting
+- Every print_every iterations, compute the maximum load (the highest number of particles managed by a single process at that moment).
+- Process 0 prints this maximum load.
