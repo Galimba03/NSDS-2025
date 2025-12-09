@@ -22,16 +22,14 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // TODO
     // Variables declaration and initialization
-    const int processor_array_size = n / size;
+    const int processor_array_size = n / size; 
     int local_discrete_point = processor_array_size * (rank + 1);
     double *processor_array = (double*) malloc(processor_array_size * sizeof(double));
     
     double *next_processor_array = (double*) calloc(processor_array_size, sizeof(double));
 
 
-    // TODO
     // Set initial conditions
     for (int i = 0; i < processor_array_size; i++) {
         processor_array[i] = initial_condition(local_discrete_point++, L);
@@ -44,11 +42,11 @@ int main(int argc, char **argv) {
 
     // Head is the left end side of the array
     // Tail is the right end side of the array
-    int source_tail = (rank == 0) ? MPI_PROC_NULL : rank - 1;
-    int dest_head = (rank == (size - 1)) ? MPI_PROC_NULL : rank + 1;
-
-    int source_head = (rank == (size - 1)) ? MPI_PROC_NULL : rank + 1;
-    int dest_tail = (rank == 0) ? MPI_PROC_NULL : rank - 1;
+    int source_tail = (rank == (size - 1)) ? MPI_PROC_NULL : rank + 1;
+    int source_head = (rank == 0) ? MPI_PROC_NULL : rank - 1;
+    
+    int dest_head = (rank == 0) ? MPI_PROC_NULL : rank - 1;
+    int dest_tail = (rank == (size - 1)) ? MPI_PROC_NULL : rank + 1;
 
     while (1) {
         // Perform one round of iterations
@@ -93,7 +91,8 @@ int main(int argc, char **argv) {
         // TODO
         // Compute global minimum and maximum
         double global_min, global_max, max_diff;
-        double local_max = processor_array[0], local_min = processor_array[0];
+        double local_max = processor_array[0];
+        double local_min = processor_array[0];
         
         for (int i = 1; i < processor_array_size; i++) {
             if (processor_array[i] > local_max) {
