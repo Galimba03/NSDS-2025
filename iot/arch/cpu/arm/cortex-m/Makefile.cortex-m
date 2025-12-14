@@ -1,3 +1,0 @@
-CONTIKI_ARM_DIRS += cortex-m cortex-m/CMSIS
-
-include $(CONTIKI)/arch/cpu/arm/Makefile.arm
