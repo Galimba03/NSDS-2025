@@ -1,5 +1,4 @@
-# --- OS & IDEs ---
-.DS_Store
+# --- IDEs ---
 Thumbs.db
 .idea/
 .vscode/
@@ -12,6 +11,11 @@ Thumbs.db
 *.dll
 *.dylib
 *.a
+*.native
+*.elf
+*.map
+symbols.c
+symbols.h
 
 # --- Java ---
 *.class
@@ -26,7 +30,11 @@ Thumbs.db
 *.srec
 
 # --- Build Directories ---
+obj_*/
 build/
 bin/
 out/
 dist/
+
+# --- OS Specific ---
+.DS_Store
