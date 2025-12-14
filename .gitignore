@@ -36,5 +36,15 @@ bin/
 out/
 dist/
 
+# Ignore source folders you don't want in the repo
+iot/arch/
+iot/os/
+iot/tests/
+iot/tools/
+iot/.travis.yml
+iot/Makefile.*
+iot/LICENSE.md
+iot/CONTRIBUTING.md
+
 # --- OS Specific ---
 .DS_Store
