@@ -1,3 +1,32 @@
+# --- OS & IDEs ---
+.DS_Store
+Thumbs.db
 .idea/
 .vscode/
-.DS_Store
+*.swp
+
+# --- C/C++ Compiled Objects ---
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+
+# --- Java ---
+*.class
+*.jar
+*.war
+
+# --- Embedded/Build Output (based on your files) ---
+*.elf
+*.map
+*.hex
+*.bin
+*.srec
+
+# --- Build Directories ---
+build/
+bin/
+out/
+dist/
