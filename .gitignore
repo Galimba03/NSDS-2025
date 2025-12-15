@@ -14,6 +14,7 @@ Thumbs.db
 *.native
 *.elf
 *.map
+*.sky
 symbols.c
 symbols.h
 
